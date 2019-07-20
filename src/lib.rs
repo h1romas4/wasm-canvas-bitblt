@@ -48,6 +48,10 @@ impl Screen {
     }
 }
 
+#[cfg(feature = "wee_alloc")]
+#[global_allocator]
+static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 #[test]
 fn it_works() {
     Screen::new(768, 576);
