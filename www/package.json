@@ -1,0 +1,20 @@
+{
+    "name": "wasm-canvas-bitblt",
+    "version": "0.1.0",
+    "scripts": {
+        "build": "webpack --config webpack.config.js",
+        "start": "webpack-dev-server"
+    },
+    "dependencies": {
+        "wasm-canvas-bitblt": "file:../pkg"
+    },
+    "devDependencies": {
+        "webpack": "^4.36.1",
+        "webpack-cli": "^3.3.6",
+        "webpack-dev-server": "^3.7.2",
+        "ts-loader": "^6.0.4",
+        "typescript": "^3.5.3",
+        "tslint": "^5.18.0",
+        "copy-webpack-plugin": "^5.0.3"
+    }
+}
