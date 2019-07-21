@@ -1,5 +1,9 @@
 # wasm-canvas-bitblt 🦀🕸
 
+## Demo
+
+[Demo](https://h1romas4.github.io/wasm-canvas-bitblt/)
+
 ## build
 
 Rust and [wasm-pack](https://rustwasm.github.io/wasm-pack) setup
