@@ -31,7 +31,7 @@ impl Screen {
     }
 
     pub fn draw(&mut self) {
-        self.pset(0, 0, (0xff, 0x00, 0x00));
+        self.circle((100, 100), 50, (0x00, 0x00, 0x00));
     }
 
     fn pset(&mut self, x:isize, y: isize, color: (u8, u8, u8)) {
@@ -45,6 +45,34 @@ impl Screen {
         self.vram[pos + 1] = color.1;
         self.vram[pos + 2] = color.2;
         self.vram[pos + 3] = 0xff;
+    }
+
+    ///
+    /// Midpoint Circle Algorithm
+    ///
+    fn circle(&mut self, point: (isize, isize), r: usize, color: (u8, u8, u8)) {
+        let mut x = r as isize;
+        let mut y: isize = 0;
+        let mut err: isize = 0;
+
+        while x >= y {
+            self.pset(point.0 + x, point.1 + y, color);
+            self.pset(point.0 + y, point.1 + x, color);
+            self.pset(point.0 - y, point.1 + x, color);
+            self.pset(point.0 - x, point.1 + y, color);
+            self.pset(point.0 - x, point.1 - y, color);
+            self.pset(point.0 - y, point.1 - x, color);
+            self.pset(point.0 + y, point.1 - x, color);
+            self.pset(point.0 + x, point.1 - y, color);
+            if err <= 0 {
+                y += 1;
+                err += 2 * y + 1;
+            }
+            if err > 0 {
+                x -= 1;
+                err -= 2 * x + 1;
+            }
+        }
     }
 }
 
