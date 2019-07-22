@@ -1,6 +1,7 @@
 mod utils;
 
 use wasm_bindgen::prelude::*;
+use utils::*;
 
 const RGBA: usize = 4;
 
@@ -15,7 +16,8 @@ pub struct Screen {
 impl Screen {
     #[wasm_bindgen(constructor)]
     pub fn new(width: usize, height: usize) -> Self {
-        utils::set_panic_hook();
+        set_panic_hook();
+        console_log!("wasm start");
         Screen {
             vram: vec![0xff; width * height * RGBA],
             width: width,
