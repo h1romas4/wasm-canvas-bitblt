@@ -141,9 +141,9 @@ impl Screen {
         }
     }
 
-    //
+    ///
     /// Triangle Fill(Buttom flat)
-    //
+    ///
     fn triangle_fill_buttom_flat(&mut self, v0: (isize, isize), v1: (isize, isize), v2: (isize, isize), color: (u8, u8, u8)) {
         let invslope1: f32 = ((v1.0 - v0.0) as f32 / (v1.1 - v0.1) as f32) as f32;
         let invslope2: f32 = ((v2.0 - v0.0) as f32 / (v2.1 - v0.1) as f32) as f32;
@@ -158,9 +158,9 @@ impl Screen {
         }
     }
 
-    //
+    ///
     /// Triangle Fill(Top flat)
-    //
+    ///
     fn triangle_fill_top_flat(&mut self, v0: (isize, isize), v1: (isize, isize), v2: (isize, isize), color: (u8, u8, u8)) {
         let invslope1: f32 = ((v2.0 - v0.0) as f32 / (v2.1 - v0.1) as f32) as f32;
         let invslope2: f32 = ((v2.0 - v1.0) as f32 / (v2.1 - v1.1) as f32) as f32;
