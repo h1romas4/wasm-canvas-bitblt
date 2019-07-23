@@ -36,8 +36,7 @@ impl Screen {
         self.circle((100, 100), 50, (0x00, 0x00, 0x00));
         self.line((0, 0), (100, 100), (0x00, 0x00, 0x00));
         self.line((100, 100), (200, 100), (0x00, 0x00, 0x00));
-        self.triangle_fill_buttom_flat((300, 0), (200, 100), (400, 100), (0x00, 0x00, 0x00));
-        self.triangle_fill_top_flat((300, 0), (500, 0), (400, 100), (0x00, 0x00, 0x00));
+        self.triangle_fill((0, 200), (300, 100), (400, 300), (0x00, 0x00, 0x00));
     }
 
     ///
@@ -117,21 +116,43 @@ impl Screen {
     ///
     /// Triangle Fill
     ///
-    fn triangle_fill(&mut self, v0: (isize, isize), v1: (isize, isize), v2: (isize, isize), color: (u8, u8, u8)) {
+    fn triangle_fill(&mut self, p0: (isize, isize), p1: (isize, isize), p2: (isize, isize), color: (u8, u8, u8)) {
+        let v0: (isize, isize);
+        let v1: (isize, isize);
+        let v2: (isize, isize);
+
+        let mut sorted = vec![p0, p1, p2];
+        sorted.sort_by(|a, b| a.1.cmp(&b.1));
+        v0 = sorted[0];
+        v1 = sorted[1];
+        v2 = sorted[2];
+
+        if v1.1 == v2.1 {
+            self.triangle_fill_buttom_flat(v0, v1, v2, color);
+        } else if v0.1 == v1.1 {
+            self.triangle_fill_top_flat(v0, v1, v2, color);
+        } else {
+            let v3 = (
+                (v0.0 as f32 + ((v1.1 - v0.1) as f32 / (v2.1 - v0.1) as f32) as f32 * (v2.0 - v0.0) as f32) as isize
+                , v1.1
+            );
+            self.triangle_fill_buttom_flat(v0, v1, v3, color);
+            self.triangle_fill_top_flat(v1, v3, v2, color);
+        }
     }
 
     //
     /// Triangle Fill(Buttom flat)
     //
     fn triangle_fill_buttom_flat(&mut self, v0: (isize, isize), v1: (isize, isize), v2: (isize, isize), color: (u8, u8, u8)) {
-        let invslope1: isize = (v1.0 - v0.0) / (v1.1 - v0.1);
-        let invslope2: isize = (v2.0 - v0.0) / (v2.1 - v0.1);
+        let invslope1: f32 = ((v1.0 - v0.0) as f32 / (v1.1 - v0.1) as f32) as f32;
+        let invslope2: f32 = ((v2.0 - v0.0) as f32 / (v2.1 - v0.1) as f32) as f32;
 
-        let mut curx1: isize = v0.0;
-        let mut curx2: isize = v0.0;
+        let mut curx1: f32 = v0.0 as f32;
+        let mut curx2: f32 = v0.0 as f32;
 
         for scanline_y in v0.1..=v1.1 {
-            self.line((curx1, scanline_y), (curx2, scanline_y), color);
+            self.line((curx1 as isize, scanline_y), (curx2 as isize, scanline_y), color);
             curx1 += invslope1;
             curx2 += invslope2;
         }
@@ -141,14 +162,14 @@ impl Screen {
     /// Triangle Fill(Top flat)
     //
     fn triangle_fill_top_flat(&mut self, v0: (isize, isize), v1: (isize, isize), v2: (isize, isize), color: (u8, u8, u8)) {
-        let invslope1: isize = (v2.0 - v0.0) / (v2.1 - v0.1);
-        let invslope2: isize = (v2.0 - v1.0) / (v2.1 - v1.1);
+        let invslope1: f32 = ((v2.0 - v0.0) as f32 / (v2.1 - v0.1) as f32) as f32;
+        let invslope2: f32 = ((v2.0 - v1.0) as f32 / (v2.1 - v1.1) as f32) as f32;
 
-        let mut curx1: isize = v2.0;
-        let mut curx2: isize = v2.0;
+        let mut curx1: f32 = v2.0 as f32;
+        let mut curx2: f32 = v2.0 as f32;
 
         for scanline_y in (v0.1..v2.1).rev() {
-            self.line((curx1, scanline_y), (curx2, scanline_y), color);
+            self.line((curx1 as isize, scanline_y), (curx2 as isize, scanline_y), color);
             curx1 -= invslope1;
             curx2 -= invslope2;
         }
