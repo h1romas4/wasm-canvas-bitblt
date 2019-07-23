@@ -51,7 +51,7 @@ class Bitblt {
         this.canvas_image_data.data.set(this.image_data);
         this.canvas_context.putImageData(this.canvas_image_data, 0, 0);
         // next tick
-        this.anime_id = requestAnimationFrame(() => this.loop);
+        this.anime_id = requestAnimationFrame(() => this.loop());
     }
 }
 
