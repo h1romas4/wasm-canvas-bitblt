@@ -1,6 +1,7 @@
 mod utils;
 
 use std::f32;
+use std::ptr;
 use wasm_bindgen::prelude::*;
 use utils::*;
 
@@ -57,9 +58,9 @@ impl Screen {
     }
 
     fn clear(&mut self) {
-        let vram = self.vram.as_mut_slice();
-        for pos in 0..(self.width * self.height) * 4 {
-            vram[pos] = 0x00;
+        unsafe {
+            let vram = self.vram.as_mut_ptr();
+            ptr::write_bytes(vram, 0x00, (self.width * self.height - 1) * 4);
         }
     }
 
@@ -74,18 +75,18 @@ impl Screen {
     ///
     /// Point Set
     ///
+    #[allow(dead_code)]
     fn pset(&mut self, p: (isize, isize), color: (u8, u8, u8)) {
         let pos = (p.1 * self.width as isize + p.0) * RGBA as isize;
         // cliping
         if pos < 0 && pos > (self.width * self.height) as isize {
             return;
         }
-        let pos: usize = pos as usize;
-        let vram = self.vram.as_mut_slice();
-        vram[pos + 0] = color.0;
-        vram[pos + 1] = color.1;
-        vram[pos + 2] = color.2;
-        vram[pos + 3] = 0xff;
+        let pos = pos as isize;
+        unsafe {
+            let c = [color.0, color.1, color.2, 0xff].as_ptr();
+            ptr::copy_nonoverlapping(c, self.vram.as_mut_ptr().offset(pos), 4);
+        }
     }
 
     ///
@@ -120,6 +121,7 @@ impl Screen {
     ///
     /// Bresenham's Line Algorithm
     ///
+    #[allow(dead_code)]
     fn line(&mut self, p0: (isize, isize), p1: (isize, isize), color: (u8, u8, u8)) {
         let dx = isize::abs(p1.0 - p0.0);
         let dy = isize::abs(p1.1 - p0.1);
@@ -150,6 +152,7 @@ impl Screen {
     ///
     /// Triangle Fill
     ///
+    #[allow(dead_code)]
     fn triangle_fill(&mut self, p0: (isize, isize), p1: (isize, isize), p2: (isize, isize), color: (u8, u8, u8)) {
         let v0: (isize, isize);
         let v1: (isize, isize);
