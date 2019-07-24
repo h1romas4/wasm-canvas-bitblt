@@ -16,6 +16,9 @@ class Bitblt {
     private imageData: Uint8Array;
 
     private animeId: number;
+    private startTime: number;
+    private frame: number;
+    private fps: number;
 
     /**
      * constructor
@@ -32,12 +35,16 @@ class Bitblt {
         this.canvasContext = this.canvas.getContext('2d');
         this.canvasImageData = this.canvasContext.createImageData(
             Bitblt.CANVAS_WIDTH, Bitblt.CANVAS_HEIGHT);
+        this.canvasContext.font = "16px sans-serif";
+        this.canvasContext.fillStyle = "#0f0";
 
         this.screen = new Screen(Bitblt.CANVAS_WIDTH, Bitblt.CANVAS_HEIGHT);
         this.imageData = new Uint8Array(
             memory.buffer,
             this.screen.get_canvas_bitmap_ptr(),
             Bitblt.CANVAS_WIDTH * Bitblt.CANVAS_HEIGHT * Bitblt.RGBA);
+
+        this.startTime = new Date().getTime();
     }
 
     /**
@@ -50,6 +57,14 @@ class Bitblt {
         this.screen.draw();
         this.canvasImageData.data.set(this.imageData);
         this.canvasContext.putImageData(this.canvasImageData, 0, 0);
+        // fps
+        this.frame++;
+        if(new Date().getTime() - this.startTime >= 1000) {
+            this.fps = this.frame;
+            this.frame = 0;
+            this.startTime = new Date().getTime();
+        }
+        this.canvasContext.fillText("fps: " + this.fps, 0, 16);
         // next tick
         this.animeId = requestAnimationFrame(() => this.loop());
     }
