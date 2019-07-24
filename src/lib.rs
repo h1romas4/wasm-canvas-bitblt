@@ -42,19 +42,29 @@ impl Screen {
     }
 
     pub fn draw(&mut self) {
-        let bx: f32 = self.width as f32 / 2_f32;
-        let by: f32 = self.height as f32  / 2_f32;
-        let rd: f32 = 200_f32;
-
-        let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;
-        let rd1 = self.rotation(self.tick as f32, 120_f32) * PI / 180_f32;
-        let rd2 = self.rotation(self.tick as f32, 240_f32) * PI / 180_f32;
-        let p0: (isize, isize) = ((f32::sin(rd0) * rd + (f32::sin(rd2) * 200_f32 + bx)) as isize, (f32::cos(rd0) * rd + by) as isize);
-        let p1: (isize, isize) = ((f32::sin(rd1) * rd + bx) as isize, (f32::cos(rd1) * rd + by) as isize);
-        let p2: (isize, isize) = ((f32::sin(rd2) * rd + bx) as isize, (f32::cos(rd2) * rd + by) as isize);
-
         self.clear();
-        self.triangle_fill(p0, p1, p2, (0xf0, 0xf0, 0x00));
+        let rd: f32 = 16_f32;
+        for by in (32..self.height).step_by(32) {
+            for bx in (32..self.width).step_by(32) {
+                let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;
+                let rd1 = self.rotation(self.tick as f32, 120_f32) * PI / 180_f32;
+                let rd2 = self.rotation(self.tick as f32, 240_f32) * PI / 180_f32;
+                let p0: (isize, isize) = (
+                    (f32::sin(rd0) * rd + bx as f32) as isize,
+                    (f32::cos(rd0) * rd + by as f32) as isize
+                );
+                let p1: (isize, isize) = (
+                    (f32::sin(rd1) * rd + bx as f32) as isize,
+                    (f32::cos(rd1) * rd + by as f32) as isize
+                );
+                let p2: (isize, isize) = (
+                    (f32::sin(rd2) * rd + bx as f32) as isize,
+                    (f32::cos(rd2) * rd + by as f32) as isize
+                );
+                self.pset((bx as isize, by as isize), (0xf0, 0xf0, 0x00));
+                self.triangle_fill(p0, p1, p2, (0xf0, 0xf0, 0x00));
+            }
+        }
     }
 
     fn clear(&mut self) {
