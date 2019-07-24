@@ -75,7 +75,7 @@ impl Screen {
     ///
     /// Point Set
     ///
-    #[allow(dead_code)]
+    #[inline(always)]
     fn pset(&mut self, p: (isize, isize), color: (u8, u8, u8)) {
         let pos = (p.1 * self.width as isize + p.0) * RGBA as isize;
         // cliping
@@ -86,6 +86,37 @@ impl Screen {
         unsafe {
             let c = [color.0, color.1, color.2, 0xff].as_ptr();
             ptr::copy_nonoverlapping(c, self.vram.as_mut_ptr().offset(pos), 4);
+        }
+    }
+
+    ///
+    /// Bresenham's Line Algorithm
+    ///
+    #[inline(always)]
+    fn line(&mut self, p0: (isize, isize), p1: (isize, isize), color: (u8, u8, u8)) {
+        let dx = isize::abs(p1.0 - p0.0);
+        let dy = isize::abs(p1.1 - p0.1);
+        let sx = if p0.0 < p1.0 { 1 } else { -1 };
+        let sy = if p0.1 < p1.1 { 1 } else { -1 };
+
+        let mut x0 = p0.0;
+        let mut y0 = p0.1;
+        let mut err = dx - dy;
+
+        loop {
+            self.pset((x0, y0), color);
+            if x0 == p1.0 && y0 == p1.1 {
+                break;
+            }
+            let e2 = 2 * err;
+            if e2 > -dy {
+                err -= dy;
+                x0 += sx;
+            }
+            if e2 < dx {
+                err += dx;
+                y0 += sy;
+            }
         }
     }
 
@@ -114,37 +145,6 @@ impl Screen {
             if err > 0 {
                 x -= 1;
                 err -= 2 * x + 1;
-            }
-        }
-    }
-
-    ///
-    /// Bresenham's Line Algorithm
-    ///
-    #[allow(dead_code)]
-    fn line(&mut self, p0: (isize, isize), p1: (isize, isize), color: (u8, u8, u8)) {
-        let dx = isize::abs(p1.0 - p0.0);
-        let dy = isize::abs(p1.1 - p0.1);
-        let sx = if p0.0 < p1.0 { 1 } else { -1 };
-        let sy = if p0.1 < p1.1 { 1 } else { -1 };
-
-        let mut x0 = p0.0;
-        let mut y0 = p0.1;
-        let mut err = dx - dy;
-
-        loop {
-            self.pset((x0, y0), color);
-            if x0 == p1.0 && y0 == p1.1 {
-                break;
-            }
-            let e2 = 2 * err;
-            if e2 > -dy {
-                err -= dy;
-                x0 += sx;
-            }
-            if e2 < dx {
-                err += dx;
-                y0 += sy;
             }
         }
     }
