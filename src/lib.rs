@@ -57,8 +57,9 @@ impl Screen {
     }
 
     fn clear(&mut self) {
+        let vram = self.vram.as_mut_slice();
         for pos in 0..(self.width * self.height) * 4 {
-            self.vram[pos] = 0x00;
+            vram[pos] = 0x00;
         }
     }
 
@@ -80,10 +81,11 @@ impl Screen {
             return;
         }
         let pos: usize = pos as usize;
-        self.vram[pos + 0] = color.0;
-        self.vram[pos + 1] = color.1;
-        self.vram[pos + 2] = color.2;
-        self.vram[pos + 3] = 0xff;
+        let vram = self.vram.as_mut_slice();
+        vram[pos + 0] = color.0;
+        vram[pos + 1] = color.1;
+        vram[pos + 2] = color.2;
+        vram[pos + 3] = 0xff;
     }
 
     ///
