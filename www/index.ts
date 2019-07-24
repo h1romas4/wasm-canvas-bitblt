@@ -45,6 +45,8 @@ class Bitblt {
             Bitblt.CANVAS_WIDTH * Bitblt.CANVAS_HEIGHT * Bitblt.RGBA);
 
         this.startTime = new Date().getTime();
+        this.fps = 0;
+        this.frame = 0;
     }
 
     /**
