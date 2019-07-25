@@ -2,7 +2,7 @@ import { Screen } from "wasm-canvas-bitblt";
 import { memory } from "wasm-canvas-bitblt/wasm_canvas_bitblt_bg";
 
 /**
- * BitbltCanvas
+ * WebAssembly Bitblt Test
  */
 class Bitblt {
     static readonly CANVAS_WIDTH = 768;
@@ -19,6 +19,13 @@ class Bitblt {
     private startTime: number;
     private frame: number;
     private fps: number;
+
+    private resources: string[] = [
+        "resources/rustacean-flat-happy-768x512.png"
+    ];
+
+    private loadedCount: number;
+    private resourceLoaded: boolean;
 
     /**
      * constructor
@@ -49,27 +56,69 @@ class Bitblt {
         this.frame = 0;
     }
 
+    public start() {
+        this.load();
+        this.loop();
+    }
+
     /**
      * loop
      */
     public loop() {
-        // update
-        this.screen.update();
-        // draw
-        this.screen.draw();
-        this.canvasImageData.data.set(this.imageData);
-        this.canvasContext.putImageData(this.canvasImageData, 0, 0);
-        // fps
-        this.frame++;
-        if(new Date().getTime() - this.startTime >= 1000) {
-            this.fps = this.frame;
-            this.frame = 0;
-            this.startTime = new Date().getTime();
+        // resource wait
+        if(this.resourceLoaded) {
+            // update (TODO: split update/draw)
+            this.screen.update();
+            // draw
+            this.screen.draw();
+            this.canvasImageData.data.set(this.imageData);
+            this.canvasContext.putImageData(this.canvasImageData, 0, 0);
+            // print fps
+            this.frame++;
+            if(new Date().getTime() - this.startTime >= 1000) {
+                this.fps = this.frame;
+                this.frame = 0;
+                this.startTime = new Date().getTime();
+            }
+            this.canvasContext.fillText("fps: " + this.fps, 0, 16);
         }
-        this.canvasContext.fillText("fps: " + this.fps, 0, 16);
         // next tick
         this.animeId = requestAnimationFrame(() => this.loop());
     }
+
+    /**
+     * resource load (sync)
+     */
+    private load() {
+        this.loadedCount = 0;
+        this.resourceLoaded = false;
+        // create resource canvas
+        let cx = document.createElement('canvas').getContext('2d');
+        for(let resource of this.resources) {
+            let image = new Image();
+            image.addEventListener('load', () => {
+                // draw image
+                cx.drawImage(image, 0, 0);
+                // get typedarray
+                let resourceImageData = cx.getImageData(0, 0, image.width, image.height);
+                // alloc wasm memory
+                let imageData = new Uint8Array(
+                    memory.buffer,
+                    this.screen.get_resource_bitmap_ptr(0),
+                    image.width * image.height * Bitblt.RGBA);
+                imageData.set(resourceImageData.data);
+                this.loadedCount++;
+            });
+            image.src = resource;
+        }
+        // resource load wait
+        let wait = window.setInterval(() => {
+            if(this.resources.length <= this.loadedCount) {
+                this.resourceLoaded = true;
+                window.clearInterval(wait);
+            }
+        }, 10);
+    }
 }
 
-new Bitblt().loop();
+new Bitblt().start();

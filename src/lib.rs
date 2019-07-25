@@ -14,6 +14,7 @@ pub struct Screen {
     vram: Bitblt,
     width: usize,
     height: usize,
+    resource: Vec<Bitblt>,
     tick: usize
 }
 
@@ -27,12 +28,22 @@ impl Screen {
             vram: Bitblt::new(width, height),
             width: width,
             height: height,
+            // TODO:
+            resource: vec![
+                Bitblt::new(width, height),
+                Bitblt::new(width, height),
+                Bitblt::new(width, height)
+            ],
             tick: 0
         }
     }
 
     pub fn get_canvas_bitmap_ptr(&mut self) -> *mut u8 {
         self.vram.get_vram_ptr()
+    }
+
+    pub fn get_resource_bitmap_ptr(&mut self, no: usize) -> *mut u8 {
+        self.resource[no].get_vram_ptr()
     }
 
     pub fn update(&mut self) {

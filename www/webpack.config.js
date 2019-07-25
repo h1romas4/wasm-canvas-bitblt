@@ -15,6 +15,6 @@ module.exports = {
     mode: "development",
     devtool: 'inline-source-map',
     plugins: [
-        new CopyWebpackPlugin(['index.html', 'style.css'])
+        new CopyWebpackPlugin(['index.html', 'style.css', 'resources/*'])
     ],
 };
