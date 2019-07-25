@@ -44,11 +44,11 @@ impl Screen {
     pub fn draw(&mut self) {
         self.clear();
         let rd: f32 = 16_f32;
+        let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;
+        let rd1 = self.rotation(self.tick as f32, 120_f32) * PI / 180_f32;
+        let rd2 = self.rotation(self.tick as f32, 240_f32) * PI / 180_f32;
         for by in (32..self.height).step_by(32) {
             for bx in (32..self.width).step_by(32) {
-                let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;
-                let rd1 = self.rotation(self.tick as f32, 120_f32) * PI / 180_f32;
-                let rd2 = self.rotation(self.tick as f32, 240_f32) * PI / 180_f32;
                 let p0: (isize, isize) = (
                     (f32::sin(rd0) * rd + bx as f32) as isize,
                     (f32::cos(rd0) * rd + by as f32) as isize
