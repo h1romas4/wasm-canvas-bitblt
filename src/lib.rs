@@ -94,8 +94,10 @@ impl Screen {
         }
         let pos = pos as isize;
         unsafe {
-            let c = [color.0, color.1, color.2, 0xff].as_ptr();
-            ptr::copy_nonoverlapping(c, self.vram.as_mut_ptr().offset(pos), 4);
+            ptr::copy_nonoverlapping(
+                [color.0, color.1, color.2, 0xff].as_ptr(),
+                self.vram.as_mut_ptr().offset(pos), 4
+            );
         }
     }
 
