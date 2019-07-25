@@ -11,7 +11,7 @@ const PI: f32 = f32::consts::PI;
 
 #[wasm_bindgen]
 pub struct Screen {
-    vram: Bitblt,
+    canvas: Bitblt,
     width: usize,
     height: usize,
     resource: Vec<Bitblt>,
@@ -25,7 +25,7 @@ impl Screen {
         set_panic_hook();
         console_log!("wasm start");
         Screen {
-            vram: Bitblt::new(width, height),
+            canvas: Bitblt::new(width, height),
             width: width,
             height: height,
             // TODO:
@@ -39,7 +39,7 @@ impl Screen {
     }
 
     pub fn get_canvas_bitmap_ptr(&mut self) -> *mut u8 {
-        self.vram.get_vram_ptr()
+        self.canvas.get_vram_ptr()
     }
 
     pub fn get_resource_bitmap_ptr(&mut self, no: usize) -> *mut u8 {
@@ -54,7 +54,10 @@ impl Screen {
     }
 
     pub fn draw(&mut self) {
-        self.vram.clear();
+        self.canvas.clear();
+
+        self.canvas.bitblt(&self.resource[0], (0, 0), (768, 512));
+
         let rd: f32 = 16_f32;
         let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;
         let rd1 = self.rotation(self.tick as f32, 120_f32) * PI / 180_f32;
@@ -73,8 +76,8 @@ impl Screen {
                     (f32::sin(rd2) * rd + bx as f32) as isize,
                     (f32::cos(rd2) * rd + by as f32) as isize
                 );
-                self.vram.pset((bx as isize, by as isize), (0xf0, 0xf0, 0x00));
-                self.vram.triangle_fill(p0, p1, p2, (0xf0, 0xf0, 0x00));
+                self.canvas.pset((bx as isize, by as isize), (0xf0, 0xf0, 0x00));
+                self.canvas.triangle_fill(p0, p1, p2, (0xf0, 0xf0, 0x00));
             }
         }
     }

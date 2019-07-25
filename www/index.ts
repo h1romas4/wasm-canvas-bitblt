@@ -93,7 +93,10 @@ class Bitblt {
         this.loadedCount = 0;
         this.resourceLoaded = false;
         // create resource canvas
-        let cx = document.createElement('canvas').getContext('2d');
+        let cv = document.createElement('canvas')
+        cv.width = Bitblt.CANVAS_WIDTH;
+        cv.height = Bitblt.CANVAS_HEIGHT;
+        let cx = cv.getContext('2d');
         for(let resource of this.resources) {
             let image = new Image();
             image.addEventListener('load', () => {
@@ -105,7 +108,7 @@ class Bitblt {
                 let imageData = new Uint8Array(
                     memory.buffer,
                     this.screen.get_resource_bitmap_ptr(0),
-                    image.width * image.height * Bitblt.RGBA);
+                    Bitblt.CANVAS_WIDTH * Bitblt.CANVAS_HEIGHT * Bitblt.RGBA);
                 imageData.set(resourceImageData.data);
                 this.loadedCount++;
             });

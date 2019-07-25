@@ -33,12 +33,44 @@ impl Bitblt {
     }
 
     ///
+    /// get_vram
+    ///
+    pub fn get_vram(&self) -> &[u8] {
+        self.vram.as_slice()
+    }
+
+    ///
+    /// get_size
+    ///
+    pub fn get_size(&self) -> (usize, usize) {
+        (self.width, self.height)
+    }
+
+    ///
     /// Clear VRAM
     ///
     pub fn clear(&mut self) {
         unsafe {
             let vram = self.vram.as_mut_ptr();
             ptr::write_bytes(vram, 0x00, (self.width * self.height - 1) * 4);
+        }
+    }
+
+    ///
+    /// bitblt
+    ///
+    pub fn bitblt(&mut self, src: &Bitblt, p: (isize, isize), s: (isize, isize)) {
+        let (width, _) = src.get_size();
+        let vram = src.get_vram();
+        for yy in p.1..=s.1 {
+            let pos = ((yy * width as isize + p.0) * RGBA as isize) as isize;
+            unsafe {
+                ptr::copy_nonoverlapping(
+                    vram.as_ptr().offset(pos),
+                    self.vram.as_mut_ptr().offset(pos),
+                    s.0 as usize * RGBA
+                );
+            }
         }
     }
 
@@ -56,7 +88,8 @@ impl Bitblt {
         unsafe {
             ptr::copy_nonoverlapping(
                 [color.0, color.1, color.2, 0xff].as_ptr(),
-                self.vram.as_mut_ptr().offset(pos), 4
+                self.vram.as_mut_ptr().offset(pos),
+                4
             );
         }
     }
