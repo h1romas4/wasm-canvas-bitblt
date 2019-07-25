@@ -89,7 +89,7 @@ impl Screen {
     fn pset(&mut self, p: (isize, isize), color: (u8, u8, u8)) {
         let pos = (p.1 * self.width as isize + p.0) * RGBA as isize;
         // cliping
-        if pos < 0 && pos > (self.width * self.height) as isize {
+        if pos < 0 || pos >= (self.width * self.height * RGBA) as isize {
             return;
         }
         let pos = pos as isize;
