@@ -60,7 +60,7 @@ impl Screen {
     pub fn draw(&mut self) {
         self.canvas.clear();
 
-        self.canvas.bitblt(&self.resource[0], (0, 0), (768, 512));
+        self.canvas.bitblt(&self.resource[0], (0, 0), (768, 512), (0, 50));
 
         let rd: f32 = 16_f32;
         let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;

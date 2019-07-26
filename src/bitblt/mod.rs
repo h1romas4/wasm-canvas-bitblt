@@ -57,20 +57,25 @@ impl Bitblt {
     }
 
     ///
-    /// bitblt
+    /// bitblt (nonoverlapping)
     ///
-    pub fn bitblt(&mut self, src: &Bitblt, p: (isize, isize), s: (isize, isize)) {
-        let (width, _) = src.get_size();
+    pub fn bitblt(&mut self, src: &Bitblt, sp: (isize, isize), ss: (isize, isize), dp: (isize, isize)) {
+        let (swidth, _) = src.get_size();
+        let (dwidth, _) = self.get_size();
         let vram = src.get_vram();
-        for yy in p.1..=s.1 {
-            let pos = ((yy * width as isize + p.0) * RGBA as isize) as isize;
+        let mut dy = dp.1;
+        for sy in sp.1..=ss.1 {
+            let spos = ((sy * swidth as isize + sp.0) * RGBA as isize) as isize;
+            let dpos = ((dy * dwidth as isize + dp.0) * RGBA as isize) as isize;
+            // TODO: no cliping, how dangerous!
             unsafe {
                 ptr::copy_nonoverlapping(
-                    vram.as_ptr().offset(pos),
-                    self.vram.as_mut_ptr().offset(pos),
-                    s.0 as usize * RGBA
+                    vram.as_ptr().offset(spos),
+                    self.vram.as_mut_ptr().offset(dpos),
+                    ss.0 as usize * RGBA
                 );
             }
+            dy += 1;
         }
     }
 
