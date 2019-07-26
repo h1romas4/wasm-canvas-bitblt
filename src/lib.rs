@@ -38,6 +38,10 @@ impl Screen {
         }
     }
 
+    pub fn add_resource(&mut self, width: usize, height: usize) {
+        self.resource.push(Bitblt::new(width, height));
+    }
+
     pub fn get_canvas_bitmap_ptr(&mut self) -> *mut u8 {
         self.canvas.get_vram_ptr()
     }

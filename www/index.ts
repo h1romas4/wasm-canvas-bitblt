@@ -20,10 +20,10 @@ class Bitblt {
     private frame: number;
     private fps: number;
 
-    private resources: string[] = [
-        "resources/rustacean-flat-happy-768x512.png"
-    ];
-
+    // TODO: image file only
+    private resources: { [key: string]: number; } = {
+        "resources/rustacean-flat-happy-768x512.png": null
+    };
     private loadedCount: number;
     private resourceLoaded: boolean;
 
@@ -34,28 +34,29 @@ class Bitblt {
         this.canvas = <HTMLCanvasElement>document.getElementById('screen');
         this.canvas.setAttribute('width', `${Bitblt.CANVAS_WIDTH}`);
         this.canvas.setAttribute('height', `${Bitblt.CANVAS_HEIGHT}`);
+        // for device width
         let pixelRatio = window.devicePixelRatio ? window.devicePixelRatio : 1;
         if(pixelRatio > 1 && window.screen.width < Bitblt.CANVAS_WIDTH) {
             this.canvas.style.width = 320 + "px";
             this.canvas.style.height = 240 + "px";
         }
+        // create canvas context
         this.canvasContext = this.canvas.getContext('2d');
         this.canvasImageData = this.canvasContext.createImageData(
             Bitblt.CANVAS_WIDTH, Bitblt.CANVAS_HEIGHT);
+        // hello wasm world
+        this.screen = new Screen(Bitblt.CANVAS_WIDTH, Bitblt.CANVAS_HEIGHT);
+        // for fps print
         this.canvasContext.font = "16px sans-serif";
         this.canvasContext.fillStyle = "#0f0";
-
-        this.screen = new Screen(Bitblt.CANVAS_WIDTH, Bitblt.CANVAS_HEIGHT);
-        this.imageData = new Uint8Array(
-            memory.buffer,
-            this.screen.get_canvas_bitmap_ptr(),
-            Bitblt.CANVAS_WIDTH * Bitblt.CANVAS_HEIGHT * Bitblt.RGBA);
-
         this.startTime = new Date().getTime();
         this.fps = 0;
         this.frame = 0;
     }
 
+    /**
+     * start
+     */
     public start() {
         this.load();
         this.loop();
@@ -71,6 +72,13 @@ class Bitblt {
             this.screen.update();
             // draw
             this.screen.draw();
+            // recreate Uint8Array
+            // https://github.com/emscripten-core/emscripten/issues/6747
+            this.imageData = new Uint8Array(
+                memory.buffer,
+                this.screen.get_canvas_bitmap_ptr(),
+                Bitblt.CANVAS_WIDTH * Bitblt.CANVAS_HEIGHT * Bitblt.RGBA);
+            // draw wasm calculated bitmap
             this.canvasImageData.data.set(this.imageData);
             this.canvasContext.putImageData(this.canvasImageData, 0, 0);
             // print fps
@@ -92,31 +100,37 @@ class Bitblt {
     private load() {
         this.loadedCount = 0;
         this.resourceLoaded = false;
-        // create resource canvas
-        let cv = document.createElement('canvas')
-        cv.width = Bitblt.CANVAS_WIDTH;
-        cv.height = Bitblt.CANVAS_HEIGHT;
-        let cx = cv.getContext('2d');
-        for(let resource of this.resources) {
+        for(let resource in this.resources) {
             let image = new Image();
             image.addEventListener('load', () => {
+                // create resource hidden canvas
+                let canvas = document.createElement('canvas')
+                canvas.width = image.width;
+                canvas.height = image.height;
+                let context = canvas.getContext('2d');
                 // draw image
-                cx.drawImage(image, 0, 0);
-                // get typedarray
-                let resourceImageData = cx.getImageData(0, 0, image.width, image.height);
+                context.drawImage(image, 0, 0);
+                // get image typedarray
+                let resourceImageData = context.getImageData(0, 0, image.width, image.height);
                 // alloc wasm memory
+                this.screen.add_resource(image.width, image.height);
                 let imageData = new Uint8Array(
                     memory.buffer,
-                    this.screen.get_resource_bitmap_ptr(0),
-                    Bitblt.CANVAS_WIDTH * Bitblt.CANVAS_HEIGHT * Bitblt.RGBA);
+                    this.screen.get_resource_bitmap_ptr(this.loadedCount),
+                    image.width * image.height * Bitblt.RGBA);
+                // resource bitmap trancefar
                 imageData.set(resourceImageData.data);
+                // save resource number
+                this.resources[resource] = this.loadedCount;
                 this.loadedCount++;
+                // remove hidden canvas
+                canvas.remove();
             });
             image.src = resource;
         }
-        // resource load wait
+        // wait resource loaded
         let wait = window.setInterval(() => {
-            if(this.resources.length <= this.loadedCount) {
+            if(Object.keys(this.resources).length <= this.loadedCount) {
                 this.resourceLoaded = true;
                 window.clearInterval(wait);
             }
