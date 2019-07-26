@@ -61,6 +61,10 @@ impl Screen {
         self.canvas.clear();
 
         self.canvas.bitblt(&self.resource[0], (0, 0), (768, 512), (0, 50));
+        for y in 50..500 {
+            self.canvas.raster(y,
+                (30_f32 * f32::sin(2_f32 * PI * (self.tick as f32 / 60_f32 - y as f32 / 200_f32))) as isize);
+        }
 
         let rd: f32 = 16_f32;
         let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;
@@ -81,7 +85,7 @@ impl Screen {
                     (f32::cos(rd2) * rd + by as f32) as isize
                 );
                 self.canvas.pset((bx as isize, by as isize), (0xf0, 0xf0, 0x00));
-                self.canvas.triangle_fill(p0, p1, p2, (0xf0, 0xf0, 0x00));
+                self.canvas.triangle_fill(p0, p1, p2, (0x00, 0x00, 0x40));
             }
         }
     }

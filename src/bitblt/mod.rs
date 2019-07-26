@@ -80,6 +80,29 @@ impl Bitblt {
     }
 
     ///
+    /// raster
+    ///
+    pub fn raster(&mut self, sy: isize, shift: isize) {
+        let (start_x, to_x, width_x, pad_x) = if shift < 0 {
+            (-shift, 0, self.width + shift as usize, self.width + shift as usize)
+        } else {
+            (0, shift, self.width - shift as usize, 0)
+        };
+        let spos = ((sy * self.width as isize + start_x) * RGBA as isize) as isize;
+        let dpos = ((sy * self.width as isize + to_x) * RGBA as isize) as isize;
+        unsafe {
+            ptr::copy(
+                self.vram.as_mut_ptr().offset(spos),
+                self.vram.as_mut_ptr().offset(dpos),
+                width_x as usize * RGBA
+            );
+        }
+        for lx in pad_x..pad_x + isize::abs(shift) as usize {
+            self.pset((lx as isize, sy), (0x00, 0x00, 0x00));
+        }
+    }
+
+    ///
     /// Point Set
     ///
     #[inline(always)]
