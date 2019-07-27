@@ -59,12 +59,12 @@ impl Bitblt {
     ///
     /// bitblt (nonoverlapping)
     ///
-    pub fn bitblt(&mut self, src: &Bitblt, sp: (isize, isize), ss: (isize, isize), dp: (isize, isize)) {
+    pub fn bitblt(&mut self, src: &Bitblt, sp: (isize, isize), ss: (usize, usize), dp: (isize, isize)) {
         let (swidth, _) = src.get_size();
         let (dwidth, _) = self.get_size();
         let vram = src.get_vram();
         let mut dy = dp.1;
-        for sy in sp.1..=ss.1 {
+        for sy in sp.1..ss.1 as isize {
             let spos = ((sy * swidth as isize + sp.0) * RGBA as isize) as isize;
             let dpos = ((dy * dwidth as isize + dp.0) * RGBA as isize) as isize;
             // TODO: no cliping, how dangerous!
