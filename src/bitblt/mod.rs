@@ -52,7 +52,7 @@ impl Bitblt {
     pub fn clear(&mut self) {
         unsafe {
             let vram = self.vram.as_mut_ptr();
-            ptr::write_bytes(vram, 0x00, (self.width * self.height - 1) * 4);
+            ptr::write_bytes(vram, 0x00, self.width * self.height * 4);
         }
     }
 
@@ -99,6 +99,38 @@ impl Bitblt {
         }
         for lx in pad_x..pad_x + isize::abs(shift) as usize {
             self.pset((lx as isize, sy), (0x00, 0x00, 0x00));
+        }
+    }
+
+    ///
+    /// rotate
+    ///
+    pub fn rotate(&mut self, dst: &mut Bitblt, angle: f32) {
+        let (sin, cos) = (f32::sin(angle), f32::cos(angle));
+        let hx: f32 = self.width as f32 / 2_f32;
+        let hy: f32 = self.height as f32 / 2_f32;
+
+        for y in 0..self.height {
+            for x in 0..self.width {
+                let cx: f32 = x as f32 - hx;
+                let cy: f32 = y as f32 - hy;
+                let sx = ((cx * cos - cy * sin) + hx) as isize;
+                let sy = ((cx * sin + cy * cos) + hy) as isize;
+                if sx < 0 || sx >= self.width as isize || sy < 0 || sy >= self.height as isize {
+                    continue;
+                }
+                let spos = ((sy * self.width as isize + sx) * RGBA as isize) as usize;
+                dst.pset(
+                    (x as isize, y as isize),
+                    (self.vram[spos + 0], self.vram[spos + 1], self.vram[spos + 2]));
+            }
+        }
+        unsafe {
+            ptr::copy_nonoverlapping(
+                dst.get_vram_ptr().offset(0),
+                self.vram.as_mut_ptr().offset(0),
+                self.width * self.height * RGBA
+            );
         }
     }
 

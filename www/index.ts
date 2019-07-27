@@ -113,7 +113,7 @@ class Bitblt {
                 // get image typedarray
                 let resourceImageData = context.getImageData(0, 0, image.width, image.height);
                 // alloc wasm memory
-                this.screen.add_resource(image.width, image.height);
+                let resourceNumber = this.screen.add_resource(image.width, image.height);
                 let imageData = new Uint8Array(
                     memory.buffer,
                     this.screen.get_resource_bitmap_ptr(this.loadedCount),
@@ -121,7 +121,7 @@ class Bitblt {
                 // resource bitmap trancefar
                 imageData.set(resourceImageData.data);
                 // save resource number
-                this.resources[resource] = this.loadedCount;
+                this.resources[resource] = resourceNumber;
                 this.loadedCount++;
                 // remove hidden canvas
                 canvas.remove();
@@ -131,8 +131,11 @@ class Bitblt {
         // wait resource loaded
         let wait = window.setInterval(() => {
             if(Object.keys(this.resources).length <= this.loadedCount) {
-                this.resourceLoaded = true;
                 window.clearInterval(wait);
+                // application init
+                this.screen.init();
+                // go
+                this.resourceLoaded = true;
             }
         }, 10);
     }
