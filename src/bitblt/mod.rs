@@ -52,7 +52,7 @@ impl Bitblt {
     pub fn clear(&mut self) {
         unsafe {
             let vram = self.vram.as_mut_ptr();
-            ptr::write_bytes(vram, 0x00, self.width * self.height * 4);
+            ptr::write_bytes(vram, 0x00, self.width * self.height * RGBA);
         }
     }
 
