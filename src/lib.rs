@@ -1,11 +1,11 @@
-mod utils;
 mod bitblt;
+mod utils;
 
 use std::f32;
 use wasm_bindgen::prelude::*;
 
-use utils::*;
 use bitblt::Bitblt;
+use utils::*;
 
 const PI: f32 = f32::consts::PI;
 
@@ -18,7 +18,7 @@ pub struct Screen {
     resource: Vec<Bitblt>,
     // for demo (TODO: move state)
     tick: usize,
-    vram2: Bitblt
+    vram2: Bitblt,
 }
 #[wasm_bindgen]
 #[allow(dead_code)]
@@ -32,7 +32,7 @@ impl Screen {
             resource: Vec::new(),
             // for demo (TODO: move state)
             tick: 0,
-            vram2: Bitblt::new(width, height)
+            vram2: Bitblt::new(width, height),
         }
     }
 
@@ -49,8 +49,7 @@ impl Screen {
         self.resource[no].get_vram_ptr()
     }
 
-    pub fn init(&mut self) {
-    }
+    pub fn init(&mut self) {}
 
     pub fn update(&mut self) {
         self.tick += 1;
@@ -67,12 +66,21 @@ impl Screen {
         self.canvas.clear();
         self.vram2.clear();
 
-        self.vram2.bitblt(&self.resource[0], (0, 0), self.resource[0].get_size(), (0, 50));
+        self.vram2.bitblt(
+            &self.resource[0],
+            (0, 0),
+            self.resource[0].get_size(),
+            (0, 50),
+        );
         for y in 50..500 {
-            self.vram2.raster(y,
-                (30_f32 * f32::sin(2_f32 * PI * (self.tick as f32 / 60_f32 - y as f32 / 200_f32))) as isize);
+            self.vram2.raster(
+                y,
+                (30_f32 * f32::sin(2_f32 * PI * (self.tick as f32 / 60_f32 - y as f32 / 200_f32)))
+                    as isize,
+            );
         }
-        self.vram2.rotate(&mut self.canvas, self.tick as f32 * PI / 180_f32);
+        self.vram2
+            .rotate(&mut self.canvas, self.tick as f32 * PI / 180_f32);
 
         // let rd: f32 = 16_f32;
         // let rd0 = self.rotation(self.tick as f32, 0_f32) * PI / 180_f32;

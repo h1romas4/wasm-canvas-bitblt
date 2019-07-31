@@ -21,7 +21,7 @@ impl Bitblt {
         Bitblt {
             vram: vec![0x00; width * height * RGBA],
             width: width,
-            height: height
+            height: height,
         }
     }
 
@@ -59,7 +59,13 @@ impl Bitblt {
     ///
     /// bitblt (nonoverlapping)
     ///
-    pub fn bitblt(&mut self, src: &Bitblt, sp: (isize, isize), ss: (usize, usize), dp: (isize, isize)) {
+    pub fn bitblt(
+        &mut self,
+        src: &Bitblt,
+        sp: (isize, isize),
+        ss: (usize, usize),
+        dp: (isize, isize),
+    ) {
         let (swidth, _) = src.get_size();
         let (dwidth, _) = self.get_size();
         let vram = src.get_vram();
@@ -72,7 +78,7 @@ impl Bitblt {
                 ptr::copy_nonoverlapping(
                     vram.as_ptr().offset(spos),
                     self.vram.as_mut_ptr().offset(dpos),
-                    ss.0 as usize * RGBA
+                    ss.0 as usize * RGBA,
                 );
             }
             dy += 1;
@@ -84,7 +90,12 @@ impl Bitblt {
     ///
     pub fn raster(&mut self, sy: isize, shift: isize) {
         let (start_x, to_x, width_x, pad_x) = if shift < 0 {
-            (-shift, 0, self.width + shift as usize, self.width + shift as usize)
+            (
+                -shift,
+                0,
+                self.width + shift as usize,
+                self.width + shift as usize,
+            )
         } else {
             (0, shift, self.width - shift as usize, 0)
         };
@@ -94,7 +105,7 @@ impl Bitblt {
             ptr::copy(
                 self.vram.as_mut_ptr().offset(spos),
                 self.vram.as_mut_ptr().offset(dpos),
-                width_x as usize * RGBA
+                width_x as usize * RGBA,
             );
         }
         for lx in pad_x..pad_x + isize::abs(shift) as usize {
@@ -122,14 +133,19 @@ impl Bitblt {
                 let spos = ((sy * self.width as isize + sx) * RGBA as isize) as usize;
                 dst.pset(
                     (x as isize, y as isize),
-                    (self.vram[spos + 0], self.vram[spos + 1], self.vram[spos + 2]));
+                    (
+                        self.vram[spos + 0],
+                        self.vram[spos + 1],
+                        self.vram[spos + 2],
+                    ),
+                );
             }
         }
         unsafe {
             ptr::copy_nonoverlapping(
                 dst.get_vram_ptr().offset(0),
                 self.vram.as_mut_ptr().offset(0),
-                self.width * self.height * RGBA
+                self.width * self.height * RGBA,
             );
         }
     }
@@ -149,7 +165,7 @@ impl Bitblt {
             ptr::copy_nonoverlapping(
                 [color.0, color.1, color.2, 0xff].as_ptr(),
                 self.vram.as_mut_ptr().offset(pos),
-                4
+                4,
             );
         }
     }
@@ -216,7 +232,13 @@ impl Bitblt {
     ///
     /// Triangle Fill
     ///
-    pub fn triangle_fill(&mut self, p0: (isize, isize), p1: (isize, isize), p2: (isize, isize), color: (u8, u8, u8)) {
+    pub fn triangle_fill(
+        &mut self,
+        p0: (isize, isize),
+        p1: (isize, isize),
+        p2: (isize, isize),
+        color: (u8, u8, u8),
+    ) {
         let v0: (isize, isize);
         let v1: (isize, isize);
         let v2: (isize, isize);
@@ -233,8 +255,10 @@ impl Bitblt {
             self.triangle_fill_top_flat(v0, v1, v2, color);
         } else {
             let v3 = (
-                (v0.0 as f32 + ((v1.1 - v0.1) as f32 / (v2.1 - v0.1) as f32) as f32 * (v2.0 - v0.0) as f32) as isize
-                , v1.1
+                (v0.0 as f32
+                    + ((v1.1 - v0.1) as f32 / (v2.1 - v0.1) as f32) as f32 * (v2.0 - v0.0) as f32)
+                    as isize,
+                v1.1,
             );
             self.triangle_fill_buttom_flat(v0, v1, v3, color);
             self.triangle_fill_top_flat(v1, v3, v2, color);
@@ -244,7 +268,13 @@ impl Bitblt {
     ///
     /// Triangle Fill(Buttom flat)
     ///
-    fn triangle_fill_buttom_flat(&mut self, v0: (isize, isize), v1: (isize, isize), v2: (isize, isize), color: (u8, u8, u8)) {
+    fn triangle_fill_buttom_flat(
+        &mut self,
+        v0: (isize, isize),
+        v1: (isize, isize),
+        v2: (isize, isize),
+        color: (u8, u8, u8),
+    ) {
         let invslope1: f32 = ((v1.0 - v0.0) as f32 / (v1.1 - v0.1) as f32) as f32;
         let invslope2: f32 = ((v2.0 - v0.0) as f32 / (v2.1 - v0.1) as f32) as f32;
 
@@ -252,7 +282,11 @@ impl Bitblt {
         let mut curx2: f32 = v0.0 as f32;
 
         for scanline_y in v0.1..=v1.1 {
-            self.line((curx1 as isize, scanline_y), (curx2 as isize, scanline_y), color);
+            self.line(
+                (curx1 as isize, scanline_y),
+                (curx2 as isize, scanline_y),
+                color,
+            );
             curx1 += invslope1;
             curx2 += invslope2;
         }
@@ -261,7 +295,13 @@ impl Bitblt {
     ///
     /// Triangle Fill(Top flat)
     ///
-    fn triangle_fill_top_flat(&mut self, v0: (isize, isize), v1: (isize, isize), v2: (isize, isize), color: (u8, u8, u8)) {
+    fn triangle_fill_top_flat(
+        &mut self,
+        v0: (isize, isize),
+        v1: (isize, isize),
+        v2: (isize, isize),
+        color: (u8, u8, u8),
+    ) {
         let invslope1: f32 = ((v2.0 - v0.0) as f32 / (v2.1 - v0.1) as f32) as f32;
         let invslope2: f32 = ((v2.0 - v1.0) as f32 / (v2.1 - v1.1) as f32) as f32;
 
@@ -269,7 +309,11 @@ impl Bitblt {
         let mut curx2: f32 = v2.0 as f32;
 
         for scanline_y in (v0.1..v2.1).rev() {
-            self.line((curx1 as isize, scanline_y), (curx2 as isize, scanline_y), color);
+            self.line(
+                (curx1 as isize, scanline_y),
+                (curx2 as isize, scanline_y),
+                color,
+            );
             curx1 -= invslope1;
             curx2 -= invslope2;
         }
