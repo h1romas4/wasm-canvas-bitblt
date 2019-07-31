@@ -27,8 +27,8 @@ impl Screen {
     pub fn new(width: usize, height: usize) -> Self {
         Screen {
             canvas: Bitblt::new(width, height),
-            width: width,
-            height: height,
+            width,
+            height,
             resource: Vec::new(),
             // for demo (TODO: move state)
             tick: 0,

@@ -20,8 +20,8 @@ impl Bitblt {
     pub fn new(width: usize, height: usize) -> Self {
         Bitblt {
             vram: vec![0x00; width * height * RGBA],
-            width: width,
-            height: height,
+            width,
+            height,
         }
     }
 
@@ -134,7 +134,7 @@ impl Bitblt {
                 dst.pset(
                     (x as isize, y as isize),
                     (
-                        self.vram[spos + 0],
+                        self.vram[spos],
                         self.vram[spos + 1],
                         self.vram[spos + 2],
                     ),
