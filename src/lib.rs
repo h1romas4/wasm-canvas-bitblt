@@ -25,8 +25,6 @@ pub struct Screen {
 impl Screen {
     #[wasm_bindgen(constructor)]
     pub fn new(width: usize, height: usize) -> Self {
-        set_panic_hook();
-        console_log!("wasm start");
         Screen {
             canvas: Bitblt::new(width, height),
             width: width,
@@ -107,6 +105,12 @@ impl Screen {
         }
         next
     }
+}
+
+#[wasm_bindgen(start)]
+pub fn init() {
+    set_panic_hook();
+    console_log!("wasm start");
 }
 
 #[cfg(feature = "wee_alloc")]
