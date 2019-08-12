@@ -9,7 +9,7 @@
         "wasm-canvas-bitblt": "file:../pkg"
     },
     "devDependencies": {
-        "webpack": "^4.36.1",
+        "webpack": "^4.39.1",
         "webpack-cli": "^3.3.6",
         "webpack-dev-server": "^3.8.0",
         "ts-loader": "^6.0.4",
